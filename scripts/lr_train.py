@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -84,17 +85,16 @@ if __name__ == '__main__':
 
 
     with mlflow.start_run():
-        lr = LinearRegression()
-        lr.fit(x_train,y_train)
+        logreg = LogisticRegression()
+        logreg.fit(x_train, y_train)
 
-        y_prediction = lr.predict(x_test)
+        y_prediction = logreg.predict(x_test)
 
         (rmse, mae, r2) = eval_metrics(y_test,y_prediction)
-
+        print('Accuracy of logistic regression classifier on test set: {:.2f}'.format(logreg.score(x_test, y_test)))
         print("  RMSE: %s" % rmse)
         print("  MAE: %s" % mae)
         print("  R2: %s" % r2)
-
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
         mlflow.log_metric("mae", mae)
@@ -108,6 +108,6 @@ if __name__ == '__main__':
             # There are other ways to use the Model Registry, which depends on the use case,
             # please refer to the doc for more information:
             # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(lr, "model", registered_model_name="LinearRegressionAdmodel")
+            mlflow.sklearn.log_model(logreg, "model", registered_model_name="LogisticRegressionAdmodel")
         else:
-            mlflow.sklearn.log_model(lr, "model")
+            mlflow.sklearn.log_model(logreg, "model")
