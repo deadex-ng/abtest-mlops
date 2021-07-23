@@ -8,6 +8,13 @@ from sklearn import metrics
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.feature_selection import RFE
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import RepeatedKFold
+from sklearn.model_selection import cross_val_score
+from numpy import mean
+from numpy import std
 import mlflow
 import mlflow.sklearn 
 #from urlparse import urlparse
@@ -18,12 +25,6 @@ import logging
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
-
-def eval_metrics(actual, pred):
-    rmse = np.sqrt(mean_squared_error(actual, pred))
-    mae = mean_absolute_error(actual, pred)
-    r2 = r2_score(actual, pred)
-    return rmse, mae, r2
     
 if __name__ == '__main__':
     warnings.filterwarnings('ignore')
@@ -85,22 +86,20 @@ if __name__ == '__main__':
 
 
     with mlflow.start_run():
-        logreg = LogisticRegression()
-        logreg.fit(x_train, y_train)
+        rfe = RFE(estimator=DecisionTreeRegressor(), n_features_to_select=2)
+        model = DecisionTreeRegressor()
+        pipeline = Pipeline(steps=[('s',rfe),('m',model)])
 
-        y_prediction = logreg.predict(x_val)
-        #use validatation date set to calculate loss function
-        (rmse, mae, r2) = eval_metrics(y_val,y_prediction)
+        cv = RepeatedKFold(n_splits=5, n_repeats=3, random_state=1)
+        n_scores = cross_val_score(pipeline, x_train, y_train, scoring='neg_mean_absolute_error', cv=cv, n_jobs=-1, error_score='raise')
         
-        accuracy = logreg.score(x_val,y_val)
-        #loss functions for this model are: mean absolute error(mae) and root mean squared error(rmse)
-        #r2 is the r2_score
-        print("  RMSE: %s" % rmse)
-        print("  MAE: %s" % mae)
-        print("  R2: %s" % r2)
-        mlflow.log_metric("rmse", rmse)
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("mae", mae)
+        #report performance
+        #loss functions for this model are: mean absolute error(mae) and std
+        print("  mae: %s" % mean(n_scores))
+        print("  std: %s" % std(n_scores))
+   
+        mlflow.log_metric("mae", mean(n_scores))
+        mlflow.log_metric("std", std(n_scores))
 
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
 
@@ -111,6 +110,6 @@ if __name__ == '__main__':
             # There are other ways to use the Model Registry, which depends on the use case,
             # please refer to the doc for more information:
             # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-            mlflow.sklearn.log_model(logreg, "model", registered_model_name="LogisticRegressionAdmodel")
+            mlflow.sklearn.log_model(model, "model", registered_model_name="DcTreeRegressorAdmodel")
         else:
-            mlflow.sklearn.log_model(logreg, "model")
+            mlflow.sklearn.log_model(model, "model")
