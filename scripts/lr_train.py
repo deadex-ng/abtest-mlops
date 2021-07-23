@@ -29,7 +29,7 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     np.random.seed(40)
 
-    # Read the wine-quality csv file from the URL
+    # Read the AdsmartABdata csv file from the URL
     csv_url = (
         "https://raw.githubusercontent.com/deadex-ng/smartAd_ab_testing/main/data/AdSmartABdata.csv"
     )
@@ -88,10 +88,12 @@ if __name__ == '__main__':
         logreg = LogisticRegression()
         logreg.fit(x_train, y_train)
 
-        y_prediction = logreg.predict(x_test)
-
-        (rmse, mae, r2) = eval_metrics(y_test,y_prediction)
-        print('Accuracy of logistic regression classifier on test set: {:.2f}'.format(logreg.score(x_test, y_test)))
+        y_prediction = logreg.predict(x_val)
+        #use validatation date set to calculate loss function
+        (rmse, mae, r2) = eval_metrics(y_val,y_prediction)
+        
+        #loss functions for this model are: mean absolute error(mae) and root mean squared error(rmse)
+        #r2 is the r2_score
         print("  RMSE: %s" % rmse)
         print("  MAE: %s" % mae)
         print("  R2: %s" % r2)
