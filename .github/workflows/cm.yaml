@@ -28,7 +28,7 @@ jobs:
           REPO_TOKEN: ${{ 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 }}
         run: |
           pip install -r requirements.txt
-          python train.py
+          python scripts/lr_train.py
 
           cat metrics.txt > report.md
           cml-send-comment report.md
