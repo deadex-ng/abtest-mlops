@@ -20,6 +20,10 @@ jobs:
       - name: cml_run
         run: |
           # Your ML workflow goes here
-          pip install -r requirement.txt 
+          
+          #install libraries 
+          pip install -r requirement.txt
+          
+          #run the logistic regression model
           python scripts/lr_train.py
            
