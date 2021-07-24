@@ -14,6 +14,7 @@ import mlflow.sklearn
 from urllib.parse import urlparse
 import warnings
 import logging
+import dvc.api 
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
@@ -28,17 +29,20 @@ def eval_metrics(actual, pred):
 if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     np.random.seed(40)
+    
+    #read data from dvc remote storarge 
+    path = '/home/ubuntu/Desktop/project_1/mlops4/abtest-mlops/data/Ab_data.csv'
+    repo = '/home/ubuntu/Desktop/project_1/mlops4/abtest-mlops'
+    version = 'v5'
 
-    # Read the AdsmartABdata csv file from the URL
-    csv_url = (
-        "https://raw.githubusercontent.com/deadex-ng/smartAd_ab_testing/main/data/AdSmartABdata.csv"
-    )
-    try:
-        df = pd.read_csv(csv_url)
-    except Exception as e:
-        logger.exception(
-            "Unable to download training & test CSV, check your internet connection. Error: %s", e
-        )  
+
+    data_url = dvc.api.get_url(
+        path =path,
+        repo = repo,
+        rev = version
+        )
+
+    df = pd.read_csv(data_url, sep = ",")
  
     """Transform categorical data using LabelEncoder"""
     
