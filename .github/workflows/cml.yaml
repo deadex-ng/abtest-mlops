@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Deploy runner on EC2
         env:
-          REPO_TOKEN: ${{ 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 }}
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Train model
         env:
-          REPO_TOKEN: ${{ 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 }}
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install -r requirements.txt
           python lr_train.py
